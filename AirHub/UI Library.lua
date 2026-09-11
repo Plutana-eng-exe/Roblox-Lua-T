@@ -1080,40 +1080,47 @@ function utility.rgba(r, g, b, alpha)
 	local rgb = Color3.fromRGB(r, g, b)
 
 	if rgbasupported then
-		local mt = table.clone(getrawmetatable(rgb))
+		local ok, mt = pcall(function()
+			return table.clone(getrawmetatable(rgb))
+		end)
 
-		setreadonly(mt, false)
-		local old = mt.__index
+		if ok and mt then
+			pcall(setreadonly, mt, false)
+			local old = mt.__index
 
-		mt.__index = newcclosure(function(self, key)
+			mt.__index = newcclosure(function(self, key)
+				if key:lower() == "a" then
+					return alpha
+				end
+
+				return old(self, key)
+			end)
+
+			local success = pcall(setrawmetatable, rgb, mt)
+
+			if success then
+				return rgb
+			end
+		end
+	end
+
+	-- Fallback: return a plain table that mimics Color3 with an alpha field
+	return setmetatable({
+		R = r / 255,
+		G = g / 255,
+		B = b / 255,
+		a = alpha,
+	}, {
+		__index = function(self, key)
 			if key:lower() == "a" then
 				return alpha
 			end
-
-			return old(self, key)
-		end)
-
-		setrawmetatable(rgb, mt)
-	else
-		--[[
-		return setmetatable({
-			R = r,
-			G = g,
-			B = b,
-			a = alpha,
-			__type = "Color3"
-		}, {
-			__index = newcclosure(function(self, key)
-				return rgb[key]
-			end),
-
-			__tostring = newcclosure(function(self, key)
-				return string.format("%s, %s, %s", r / 255, g / 255, b / 255) -- Imitate Color3.new
-			end)
-		})]]
-	end
-
-	return rgb
+			return rgb[key]
+		end,
+		__tostring = function(self)
+			return string.format("%s, %s, %s", r / 255, g / 255, b / 255)
+		end
+	})
 end
 
 local themes = {
