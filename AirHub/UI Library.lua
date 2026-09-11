@@ -1249,6 +1249,7 @@ function utility.outline(obj, color)
 	outline.Parent = obj
 	outline.Filled = true
 	outline.Thickness = 0
+	outline.Transparency = 1
 
 	return outline
 end
@@ -1256,6 +1257,11 @@ end
 function utility.create(class, properties)
 	if not type(properties.Visible) == "boolean" then
 		properties.Visible = false
+	end
+
+	-- Ensure filled squares are opaque by default (Drawing Transparency: 0=invisible, 1=opaque)
+	if class == "Square" and properties.Filled and properties.Transparency == nil then
+		properties.Transparency = 1
 	end
 
 	-- Skip Image objects entirely on Solara or when data is unavailable
@@ -2936,6 +2942,7 @@ function library:Load(options)
 		Size = UDim2.new(1, 0, 0, sizeY),
 		Filled = true,
 		Thickness = 0,
+		Transparency = 1,
 		Parent = holder,
 		ZIndex = 3,
 		Theme = "Window Background"
@@ -2981,6 +2988,7 @@ function library:Load(options)
 		Position = UDim2.new(0, 8, 0, 42),
 		Filled = true,
 		Thickness = 0,
+		Transparency = 1,
 		Parent = main,
 		ZIndex = 5,
 		Theme = "Tab Background"
@@ -2995,6 +3003,7 @@ function library:Load(options)
 		Thickness = 0,
 		ZIndex = 5,
 		Filled = true,
+		Transparency = 1,
 		Parent = tabholder
 	})
 
@@ -3118,6 +3127,7 @@ function library:Load(options)
 			local section = utility.create("Square", {
 				Filled = true,
 				Thickness = 0,
+				Transparency = 1,
 				Size = UDim2.new(1, 0, 0, 31),
 				Parent = column,
 				Theme = "Section Background",
