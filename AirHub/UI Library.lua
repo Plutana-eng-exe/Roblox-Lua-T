@@ -407,10 +407,12 @@ local drawing = {} do
 								if custompropertygets[mtobjs[self]]("ClipsDescendants") then
 									for i, object in next, objchildren[self] do
 										if not istouching(object.Position + Vector2.new(0, poschange - diff + objpaddings[self]), object.Size, mtobjs[self].Position, mtobjs[self].Size) then
-											object.Visible = false
+											pcall(setrenderproperty, object, "Visible", false)
+											pcall(function() object.Visible = false end)
 											childrenvisupdates[objmts[object]](objmts[object], false)
 										else
-											object.Visible = true
+											pcall(setrenderproperty, object, "Visible", true)
+											pcall(function() object.Visible = true end)
 											childrenvisupdates[objmts[object]](objmts[object], true)
 										end
 									end
@@ -428,10 +430,12 @@ local drawing = {} do
 								if custompropertygets[mtobjs[self]]("ClipsDescendants") then
 									for i, object in next, objchildren[self] do
 										if not istouching(object.Position + Vector2.new(0, poschange), object.Size, mtobjs[self].Position, mtobjs[self].Size) then
-											object.Visible = false
+											pcall(setrenderproperty, object, "Visible", false)
+											pcall(function() object.Visible = false end)
 											childrenvisupdates[objmts[object]](objmts[object], false)
 										else
-											object.Visible = true
+											pcall(setrenderproperty, object, "Visible", true)
+											pcall(function() object.Visible = true end)
 											childrenvisupdates[objmts[object]](objmts[object], true)
 										end
 									end
@@ -619,11 +623,14 @@ local drawing = {} do
 					if objchildren[parent] then
 						for _, object in next, objchildren[parent] do
 							if (custompropertygets[mtobjs[parent]]("ClipsDescendants") and not istouching(object.Position, object.Size, mtobjs[parent].Position, mtobjs[parent].Size)) then
-								object.Visible = false
+								pcall(setrenderproperty, object, "Visible", false)
+								pcall(function() object.Visible = false end)
 								changechildrenvis(objmts[object], false)
 							else
-								object.Visible = vis and objvisibles[object] or false
-								changechildrenvis(objmts[object], vis and objvisibles[object] or false)
+								local newvis = vis and objvisibles[object] or false
+								pcall(setrenderproperty, object, "Visible", newvis)
+								pcall(function() object.Visible = newvis end)
+								changechildrenvis(objmts[object], newvis)
 							end
 						end
 					end
@@ -633,22 +640,31 @@ local drawing = {} do
 
 				if k == "Visible" then
 					objvisibles[obj] = v
-
+	
+					local effectivev
 					if customproperties.Parent and (not mtobjs[customproperties.Parent].Visible or (custompropertygets[mtobjs[customproperties.Parent]]("ClipsDescendants") and not istouching(obj.Position, obj.Size, mtobjs[customproperties.Parent].Position, mtobjs[customproperties.Parent].Size))) then
-						v = false
-						changechildrenvis(self, v)
+						effectivev = false
+						changechildrenvis(self, effectivev)
 					else
-						changechildrenvis(self, v)
+						effectivev = v
+						changechildrenvis(self, effectivev)
 					end
+	
+					-- Set visibility on the raw Drawing object using both APIs for Solara compatibility
+					pcall(setrenderproperty, obj, "Visible", effectivev)
+					pcall(function() obj.Visible = effectivev end)
+					return
 				end
 
 				if k == "ClipsDescendants" then
 					customproperties.ClipsDescendants = v
-
+	
 					for _, object in next, objchildren[self] do
-						object.Visible = v and (istouching(object.Position, object.Size, obj.Position, obj.Size) and objvisibles[object] or false) or objvisibles[object]
+						local vbcd = v and (istouching(object.Position, object.Size, obj.Position, obj.Size) and objvisibles[object] or false) or objvisibles[object]
+						pcall(setrenderproperty, object, "Visible", vbcd)
+						pcall(function() object.Visible = vbcd end)
 					end
-
+	
 					return
 				end
 
@@ -708,8 +724,10 @@ local drawing = {} do
 						customproperties.AbsolutePosition = v
 
 						if customproperties.Parent and custompropertygets[mtobjs[customproperties.Parent]]("ClipsDescendants") then
-							obj.Visible = istouching(v, obj.Size, mtobjs[customproperties.Parent].Position, mtobjs[customproperties.Parent].Size) and objvisibles[obj] or false
-							changechildrenvis(self, istouching(v, obj.Size, mtobjs[customproperties.Parent].Position, mtobjs[customproperties.Parent].Size) and objvisibles[obj] or false)
+							local vb1 = istouching(v, obj.Size, mtobjs[customproperties.Parent].Position, mtobjs[customproperties.Parent].Size) and objvisibles[obj] or false
+							pcall(setrenderproperty, obj, "Visible", vb1)
+							pcall(function() obj.Visible = vb1 end)
+							changechildrenvis(self, vb1)
 						end
 
 						changechildrenpos(self, v)
@@ -727,8 +745,10 @@ local drawing = {} do
 						customproperties.AbsolutePosition = v
 
 						if customproperties.Parent and custompropertygets[mtobjs[customproperties.Parent]]("ClipsDescendants") then
-							obj.Visible = istouching(v, obj.Size, mtobjs[customproperties.Parent].Position, mtobjs[customproperties.Parent].Size) and objvisibles[obj] or false
-							changechildrenvis(self, istouching(v, obj.Size, mtobjs[customproperties.Parent].Position, mtobjs[customproperties.Parent].Size) and objvisibles[obj] or false)
+							local vb2 = istouching(v, obj.Size, mtobjs[customproperties.Parent].Position, mtobjs[customproperties.Parent].Size) and objvisibles[obj] or false
+							pcall(setrenderproperty, obj, "Visible", vb2)
+							pcall(function() obj.Visible = vb2 end)
+							changechildrenvis(self, vb2)
 						end
 
 						changechildrenpos(self, v)
@@ -766,7 +786,9 @@ local drawing = {} do
 								object.Size = newsize
 
 								if custompropertygets[mtobjs[parent]]("ClipsDescendants") then
-									object.Visible = istouching(object.Position, object.Size, mtobjs[parent].Position, mtobjs[parent].Size) and objvisibles[object] or false
+									local vb3 = istouching(object.Position, object.Size, mtobjs[parent].Position, mtobjs[parent].Size) and objvisibles[object] or false
+									pcall(setrenderproperty, object, "Visible", vb3)
+									pcall(function() object.Visible = vb3 end)
 								end
 
 								custompropertysets[object]("AbsoluteSize", newsize)
@@ -812,13 +834,17 @@ local drawing = {} do
 
 						if customproperties.ClipsDescendants then
 							for _, object in next, objchildren[self] do
-								object.Visible = istouching(object.Position, object.Size, obj.Position, v) and objvisibles[object] or false
+								local vb4 = istouching(object.Position, object.Size, obj.Position, v) and objvisibles[object] or false
+								pcall(setrenderproperty, object, "Visible", vb4)
+								pcall(function() object.Visible = vb4 end)
 							end
 						end
-
+	
 						if customproperties.Parent and custompropertygets[mtobjs[customproperties.Parent]]("ClipsDescendants") then
-							obj.Visible = istouching(obj.Position, v, mtobjs[customproperties.Parent].Position, mtobjs[customproperties.Parent].Size) and objvisibles[obj] or false
-							changechildrenvis(self, istouching(obj.Position, v, mtobjs[customproperties.Parent].Position, mtobjs[customproperties.Parent].Size) and objvisibles[obj] or false)
+							local vb5 = istouching(obj.Position, v, mtobjs[customproperties.Parent].Position, mtobjs[customproperties.Parent].Size) and objvisibles[obj] or false
+							pcall(setrenderproperty, obj, "Visible", vb5)
+							pcall(function() obj.Visible = vb5 end)
+							changechildrenvis(self, vb5)
 						end
 					else
 						if customproperties.Parent and listobjs[customproperties.Parent] then
@@ -846,13 +872,17 @@ local drawing = {} do
 
 						if customproperties.ClipsDescendants then
 							for _, object in next, objchildren[self] do
-								object.Visible = istouching(object.Position, object.Size, obj.Position, v) and objvisibles[object] or false
+								local vb6 = istouching(object.Position, object.Size, obj.Position, v) and objvisibles[object] or false
+								pcall(setrenderproperty, object, "Visible", vb6)
+								pcall(function() object.Visible = vb6 end)
 							end
 						end
-
+	
 						if customproperties.Parent and custompropertygets[mtobjs[customproperties.Parent]]("ClipsDescendants") then
-							obj.Visible = istouching(obj.Position, v, mtobjs[customproperties.Parent].Position, mtobjs[customproperties.Parent].Size) and objvisibles[obj] or false
-							changechildrenvis(self, istouching(obj.Position, v, mtobjs[customproperties.Parent].Position, mtobjs[customproperties.Parent].Size) and objvisibles[obj] or false)
+							local vb7 = istouching(obj.Position, v, mtobjs[customproperties.Parent].Position, mtobjs[customproperties.Parent].Size) and objvisibles[obj] or false
+							pcall(setrenderproperty, obj, "Visible", vb7)
+							pcall(function() obj.Visible = vb7 end)
+							changechildrenvis(self, vb7)
 						end
 					end
 
@@ -874,7 +904,9 @@ local drawing = {} do
 						obj.Size = newsize
 
 						if custompropertygets[mtobjs[v]]("ClipsDescendants") then
-							obj.Visible = istouching(obj.Position, newsize, mtobjs[v].Position, mtobjs[v].Size) and objvisibles[obj] or false
+							local vbps = istouching(obj.Position, newsize, mtobjs[v].Position, mtobjs[v].Size) and objvisibles[obj] or false
+							pcall(setrenderproperty, obj, "Visible", vbps)
+							pcall(function() obj.Visible = vbps end)
 						end
 
 						changechildrenudim2pos(self, newsize)
@@ -908,24 +940,30 @@ local drawing = {} do
 						customproperties.AbsolutePosition = newpos
 
 						if custompropertygets[mtobjs[v]]("ClipsDescendants") then
-							obj.Visible = istouching(newpos, obj.Size, mtobjs[v].Position, mtobjs[v].Size) and objvisibles[obj] or false
+							local vbp1 = istouching(newpos, obj.Size, mtobjs[v].Position, mtobjs[v].Size) and objvisibles[obj] or false
+							pcall(setrenderproperty, obj, "Visible", vbp1)
+							pcall(function() obj.Visible = vbp1 end)
 						end
-
+	
 						changechildrenpos(self, newpos)
 					elseif shape ~= "Line" and shape ~= "Quad" and shape ~= "Triangle" then
 						local newpos = mtobjs[v].Position + obj.Position
 						obj.Position = newpos
 						customproperties.AbsolutePosition = newpos
-
+	
 						if custompropertygets[mtobjs[v]]("ClipsDescendants") then
-							obj.Visible = istouching(newpos, obj.Size, mtobjs[v].Position, mtobjs[v].Size) and objvisibles[obj] or false
+							local vbp2 = istouching(newpos, obj.Size, mtobjs[v].Position, mtobjs[v].Size) and objvisibles[obj] or false
+							pcall(setrenderproperty, obj, "Visible", vbp2)
+							pcall(function() obj.Visible = vbp2 end)
 						end
-
+	
 						changechildrenpos(self, newpos)
 					end
-
+	
 					if custompropertygets[mtobjs[v]]("ClipsDescendants") then
-						obj.Visible = istouching(obj.Position, obj.Size, mtobjs[v].Position, mtobjs[v].Size) and objvisibles[obj] or false
+						local vbp3 = istouching(obj.Position, obj.Size, mtobjs[v].Position, mtobjs[v].Size) and objvisibles[obj] or false
+						pcall(setrenderproperty, obj, "Visible", vbp3)
+						pcall(function() obj.Visible = vbp3 end)
 					end
 
 					customproperties.Parent = v
@@ -1000,7 +1038,7 @@ function utility.textlength(str, font, fontsize)
 	text.Size = fontsize
 
 	local textbounds = text.TextBounds
-	text:Remove()
+	pcall(function() text:Remove() end)
 
 	return textbounds
 end
@@ -1185,6 +1223,15 @@ end)
 library.gradient = _ok and _gradient or nil
 library.utility = utility
 
+-- Detect whether Drawing Image is usable (Solara blocks it)
+do
+	local _imgok = pcall(function()
+		local _probe = Drawing.new("Image")
+		pcall(function() _probe:Remove() end)
+	end)
+	library.imageSupported = _imgok
+end
+
 function utility.outline(obj, color)
 	local outline = drawing:new("Square")
 	outline.Parent = obj
@@ -1211,10 +1258,10 @@ function utility.create(class, properties)
 		properties.Visible = false
 	end
 
-	-- Skip Image objects entirely when image data is unavailable (e.g. Solara blocks Data property)
+	-- Skip Image objects entirely on Solara or when data is unavailable
 	if class == "Image" then
 		local dataval = properties.Data or properties.data
-		if not dataval then
+		if not dataval or not library.imageSupported then
 			local dummy = {exists = false}
 			setmetatable(dummy, {__index = function() return dummy end, __newindex = function() end})
 			return dummy
@@ -2995,11 +3042,6 @@ function library:Load(options)
 		})
 
 		table.insert(self.tabs, tab)
-
-		task.spawn(function()
-			task.wait()
-			tab.Visible = tab.Visible
-		end)
 
 		local column1 = utility.create("Square", {
 			Transparency = 0,
