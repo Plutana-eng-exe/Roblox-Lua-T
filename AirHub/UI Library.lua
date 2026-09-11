@@ -1349,7 +1349,7 @@ function library:Close()
 		self.holder.Visible = self.open
 	end
 
-	if self.cursor and (identifyexecutor() ~= "Solara" or identifyexecutor() ~= "Xeno") then
+	if self.cursor and (identifyexecutor() ~= "Solara" and identifyexecutor() ~= "Xeno") then
 		self.cursor.Visible = self.open
 		services.InputService.MouseIconEnabled = not self.open and self.mousestate or false
 	end
@@ -2823,7 +2823,7 @@ function library:Load(options)
 		self.extension = extension
 	end
 
-	if identifyexecutor() ~= "Solara" or identifyexecutor() ~= "Xeno" then -- this is what yall get
+	if identifyexecutor() ~= "Solara" and identifyexecutor() ~= "Xeno" then -- this is what yall get
 		local _s = pcall(function()
 			local cursor = utility.create("Triangle", {
 				Thickness = 2,
@@ -3043,7 +3043,7 @@ function library:Load(options)
 			tab.Visible = true
 			utility.changeobjecttheme(title, "Text")
 			utility.changeobjecttheme(tabtoggle, "Tab Toggle Background")
-			tabtoggle.Color = mouseover and utility.changecolor(library.theme["Tab Toggle Background"], 3) or utility.changecolor(library.theme["Tab Background"], 3)
+			tabtoggle.Color = mouseover and utility.changecolor(library.theme["Tab Toggle Background"], 3) or library.theme["Tab Toggle Background"]
 			--utility.changeobjecttheme(outline, "Tab Border")
 		end)
 
@@ -3831,12 +3831,8 @@ function library:Load(options)
 		return tabtypes, firsttabsignal
 	end
 
-	task.delay(1, function()
-		local oldPos = holder.Position
-		holder.Position = Vector2.new(0, 0)
-		task.delay(0.25, function()
-			holder.Position = oldPos
-		end)
+	task.delay(0.1, function()
+		holder.Position = utility.getcenter(sizeX, sizeY)
 	end)
 
 	return windowtypes

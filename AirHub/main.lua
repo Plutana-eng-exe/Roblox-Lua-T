@@ -1165,6 +1165,5 @@ getgenv().AirHubV2Loading = nil
 
 GeneralSignal:Fire()
 
-for _ = 1, 3 do
-	wait(0.1); GUI:Close()
-end
+wait(0.1)
+GUI:Close()
