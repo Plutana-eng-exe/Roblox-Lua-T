@@ -42,7 +42,7 @@ end
 --// Custom Drawing Library
 
 if not Drawing or not Drawing.new or not Drawing.Fonts then
-	loadstring(game.HttpGet(game, "https://pastebin.com/raw/huyiRsK0"))()
+	loadstring(game.HttpGet(game, "https://raw.githubusercontent.com/Plutana-eng-exe/Roblox-Lua-T/refs/heads/main/AirHub/Depo/Pizza/Pastbin.lua"))()
 
 	repeat
 		wait(0)
