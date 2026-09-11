@@ -16,11 +16,13 @@ local osdate = os.date
 
 --// Launching
 
-loadstring(readfile("AirHub\\Depo\\Library.lua"))()
+local _raw = "https://raw.githubusercontent.com/Plutana-eng-exe/Roblox-Lua-T/refs/heads/main/AirHub/"
 
-local GUI = loadstring(readfile("AirHub\\UI Library.lua"))()
-local ESP = loadstring(readfile("AirHub\\Depo\\ESP.lua"))()
-local Aimbot = loadstring(readfile("AirHub\\Depo\\Aimbot.lua"))()
+loadstring(game:HttpGet(_raw .. "Depo/Library.lua"))()
+
+local GUI    = loadstring(game:HttpGet(_raw .. "UI%20Library.lua"))()
+local ESP    = loadstring(game:HttpGet(_raw .. "Depo/ESP.lua"))()
+local Aimbot = loadstring(game:HttpGet(_raw .. "Depo/Aimbot.lua"))()
 
 --// Variables
 
